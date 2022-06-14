@@ -17,23 +17,6 @@ public class EchoServer {
             DataInputStream inStream = new DataInputStream(socket.getInputStream());
             DataOutputStream outStream = new DataOutputStream(socket.getOutputStream());
 
-            new Thread(() -> {
-                try {
-                    while (true) {
-                        String message = inStream.readUTF();
-                        if ("/end".equalsIgnoreCase(message)) {
-                            outStream.writeUTF(message);
-                            System.out.println("Завершение работы...");
-                            break;
-                        }
-                        outStream.writeUTF("Echo: " + message);
-                        System.out.println("Киент: " + message);
-                    }
-                } catch (IOException e) {
-                    System.out.println("Соединение разорвано");
-                }
-            }).start();
-
             Thread scannerThread = new Thread(() -> {
                 Scanner scanner = new Scanner(System.in);
                 while (true) {
@@ -44,13 +27,27 @@ public class EchoServer {
                         e.printStackTrace();
                     }
                     if ("/end".equalsIgnoreCase(message)) {
-                        System.out.println("Завершение работы...");
+                        scanner.close();
                         break;
                     }
                 }
             });
             scannerThread.setDaemon(true);
             scannerThread.start();
+
+            try {
+                while (true) {
+                    String message = inStream.readUTF();
+                    if ("/end".equalsIgnoreCase(message)) {
+                        outStream.writeUTF(message);
+                        System.out.println("Завершение работы...");
+                        break;
+                    }
+                    System.out.println("Киент: " + message);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

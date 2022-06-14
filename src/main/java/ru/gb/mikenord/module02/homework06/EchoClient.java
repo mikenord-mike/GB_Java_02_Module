@@ -10,6 +10,7 @@ public class EchoClient {
     private Socket socket;
     private DataInputStream inStream;
     private DataOutputStream outStream;
+    private boolean isClientEndQuery;
 
     public static void main(String[] args) {
         new EchoClient().start();
@@ -24,6 +25,8 @@ public class EchoClient {
                     String message = scanner.nextLine();
                     sendMessage(message);
                     if ("/end".equalsIgnoreCase(message)) {
+                        isClientEndQuery = true;
+                        scanner.close();
                         break;
                     }
                 }
@@ -53,6 +56,9 @@ public class EchoClient {
                     String message = inStream.readUTF();
                     if ("/end".equalsIgnoreCase(message)) {
                         System.out.println("Завершение работы...");
+                        if (!isClientEndQuery) {
+                            outStream.writeUTF(message);
+                        }
                         break;
                     }
                     System.out.println("Сервер: " + message);
